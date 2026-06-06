@@ -1,0 +1,1297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logic Builders - Quiz App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a1a2e;
+            color: #eee;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 700px;
+            background: #16213e;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            overflow: hidden;
+        }
+
+        header {
+            background: #0f3460;
+            padding: 30px;
+            text-align: center;
+            border-bottom: 3px solid #e94560;
+        }
+
+        header h1 {
+            color: #e94560;
+            font-size: 2.2rem;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        header p {
+            color: #a0a0a0;
+            font-size: 1rem;
+        }
+
+        .screen {
+            display: none;
+            padding: 30px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 {
+            color: #e94560;
+            margin-bottom: 25px;
+            text-align: center;
+            font-size: 1.6rem;
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 12px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+
+        .btn-primary {
+            background: #e94560;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #0f3460;
+            color: #eee;
+            border: 2px solid #e94560;
+        }
+
+        .btn-secondary:hover {
+            background: #e94560;
+        }
+
+        .btn-ai {
+            background: #2ecc71;
+            color: white;
+        }
+
+        .btn-ai:hover {
+            background: #27ae60;
+        }
+
+        .btn-warning {
+            background: #533483;
+            color: white;
+        }
+
+        .btn-small {
+            width: auto;
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+
+        .stats {
+            background: #0f3460;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .stats span {
+            color: #e94560;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #1a1a2e;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #e94560;
+            border-radius: 5px;
+            transition: width 0.5s ease;
+            width: 0%;
+        }
+
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            color: #a0a0a0;
+            font-size: 0.9rem;
+        }
+
+        .question-box {
+            background: #0f3460;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #e94560;
+        }
+
+        .question-box h3 {
+            font-size: 1.2rem;
+            line-height: 1.5;
+        }
+
+        .option {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #16213e;
+            border: 2px solid #0f3460;
+            border-radius: 10px;
+            color: #eee;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: left;
+        }
+
+        .option:hover {
+            border-color: #e94560;
+        }
+
+        .option.correct {
+            background: #2ecc71;
+            border-color: #27ae60;
+            color: white;
+        }
+
+        .option.wrong {
+            background: #e74c3c;
+            border-color: #c0392b;
+            color: white;
+            opacity: 0.7;
+        }
+
+        .option.disabled {
+            pointer-events: none;
+        }
+
+        .feedback {
+            background: #0f3460;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .feedback.show {
+            display: block;
+        }
+
+        .feedback .correct-text {
+            color: #2ecc71;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .feedback .wrong-text {
+            color: #e74c3c;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .feedback .explanation {
+            color: #a0a0a0;
+            line-height: 1.6;
+        }
+
+        .ai-box {
+            background: #16213e;
+            border-left: 4px solid #f39c12;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .ai-box.show {
+            display: block;
+        }
+
+        .ai-box p {
+            color: #f39c12;
+            font-style: italic;
+        }
+
+        .score-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: #0f3460;
+            border: 5px solid #e94560;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto 25px;
+        }
+
+        .score-circle span {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #e94560;
+        }
+
+        .result-message {
+            text-align: center;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            color: #a0a0a0;
+        }
+
+        .result-details {
+            background: #0f3460;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .review-item {
+            background: #0f3460;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border-left: 4px solid #e74c3c;
+        }
+
+        .review-item h4 {
+            color: #e94560;
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+
+        .review-item .wrong-ans {
+            color: #e74c3c;
+        }
+
+        .review-item .correct-ans {
+            color: #2ecc71;
+        }
+
+        .review-item .explain {
+            color: #a0a0a0;
+            font-style: italic;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #16213e;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            color: #a0a0a0;
+            font-size: 0.9rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            background: #0f3460;
+            border: 2px solid #16213e;
+            border-radius: 8px;
+            color: #eee;
+            font-size: 1rem;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #e94560;
+        }
+
+        .form-group textarea {
+            min-height: 60px;
+            resize: vertical;
+        }
+
+        .q-item {
+            background: #0f3460;
+            padding: 18px;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            border-left: 4px solid #2ecc71;
+        }
+
+        .q-item h4 {
+            font-size: 1rem;
+            margin-bottom: 10px;
+        }
+
+        .q-item p {
+            color: #a0a0a0;
+            margin-bottom: 5px;
+            margin-left: 15px;
+        }
+
+        .q-item .correct-opt {
+            color: #2ecc71;
+            font-weight: bold;
+        }
+
+        .ai-status {
+            text-align: center;
+            padding: 12px;
+            border-radius: 8px;
+            background: #0f3460;
+            margin-top: 15px;
+            font-size: 0.9rem;
+        }
+
+        .ai-status.connected {
+            color: #2ecc71;
+        }
+
+        .ai-status.error {
+            color: #e74c3c;
+        }
+
+        .mock-badge {
+            background: #f39c12;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #0f3460;
+            border-top: 4px solid #e94560;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 15px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .center-text {
+            text-align: center;
+            color: #a0a0a0;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 600px) {
+            header h1 {
+                font-size: 1.6rem;
+            }
+            .screen {
+                padding: 15px;
+            }
+            .score-circle {
+                width: 120px;
+                height: 120px;
+            }
+            .score-circle span {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <header>
+            <h1>Logic Builders</h1>
+            <p>Quiz Practice App for Beginner Programming Terms</p>
+        </header>
+
+        <!-- AI SETTINGS SCREEN -->
+        <section id="screen-ai" class="screen active">
+            <h2>AI Connection</h2>
+            <p class="center-text">Choose how you want to use the app</p>
+            
+            <div class="form-group">
+                <label>Ollama URL:</label>
+                <input type="text" id="ollama-url" value="http://localhost:11434" placeholder="http://localhost:11434">
+            </div>
+            
+            <div class="form-group">
+                <label>Model Name:</label>
+                <input type="text" id="ollama-model" value="llama3.2" placeholder="llama3.2">
+            </div>
+
+            <button class="btn btn-primary" onclick="app.connectOllama()">
+                Connect to Ollama
+            </button>
+            
+            <button class="btn btn-ai" onclick="app.useMockAI()">
+                Use Mock AI (No Server Needed)
+            </button>
+
+            <button class="btn btn-secondary" onclick="app.skipAI()">
+                Skip AI (Basic Mode)
+            </button>
+
+            <div id="ai-status" class="ai-status" style="display:none;"></div>
+        </section>
+
+        <!-- MENU SCREEN -->
+        <section id="screen-menu" class="screen">
+            <div style="text-align:center;">
+                <span class="mock-badge" id="mock-badge" style="display:none;">Mock AI Mode</span>
+            </div>
+            <h2>Main Menu</h2>
+            
+            <button class="btn btn-primary" onclick="app.startQuiz()">
+                Start Quiz
+            </button>
+            <button class="btn btn-secondary" onclick="app.showAddQuestion()">
+                Add New Question
+            </button>
+            <button class="btn btn-secondary" onclick="app.showAllQuestions()">
+                View All Questions
+            </button>
+            <button class="btn btn-ai" onclick="app.showAIGenerate()">
+                Generate AI Questions
+            </button>
+            <button class="btn btn-warning" onclick="app.resetDefaults()">
+                Reset to Defaults
+            </button>
+
+            <div class="stats">
+                <p>Total Questions: <span id="total-q">0</span></p>
+            </div>
+        </section>
+
+        <!-- QUIZ SCREEN -->
+        <section id="screen-quiz" class="screen">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress"></div>
+            </div>
+            <div class="quiz-header">
+                <span id="q-number">Question 1 of 8</span>
+                <span id="q-score">Score: 0</span>
+            </div>
+            <div class="question-box">
+                <h3 id="q-text">Question text here...</h3>
+            </div>
+            <div id="options"></div>
+            
+            <div class="ai-box" id="hint-box">
+                <p id="hint-text"></p>
+            </div>
+            
+            <button class="btn btn-small btn-ai" id="hint-btn" onclick="app.getHint()" style="display:none;">
+                Ask AI for Hint
+            </button>
+
+            <div class="feedback" id="feedback">
+                <div id="feedback-result"></div>
+                <div class="explanation" id="explanation"></div>
+            </div>
+
+            <button class="btn btn-primary" id="next-btn" onclick="app.nextQuestion()" style="display:none;">
+                Next Question
+            </button>
+        </section>
+
+        <!-- RESULTS SCREEN -->
+        <section id="screen-result" class="screen">
+            <h2>Quiz Complete!</h2>
+            <div class="score-circle">
+                <span id="final-percent">0</span>%
+            </div>
+            <p class="result-message" id="result-msg">Great job!</p>
+            <div class="result-details">
+                <p>Correct: <span id="correct-num">0</span> / <span id="total-num">0</span></p>
+            </div>
+            <button class="btn btn-primary" onclick="app.showReview()">
+                Review Wrong Answers
+            </button>
+            <button class="btn btn-ai" onclick="app.getStudyPlan()">
+                Get AI Study Plan
+            </button>
+            <button class="btn btn-secondary" onclick="app.showMenu()">
+                Back to Menu
+            </button>
+        </section>
+
+        <!-- REVIEW SCREEN -->
+        <section id="screen-review" class="screen">
+            <h2>Review Wrong Answers</h2>
+            <div id="review-list"></div>
+            <button class="btn btn-secondary" onclick="app.showMenu()">
+                Back to Menu
+            </button>
+        </section>
+
+        <!-- ADD QUESTION SCREEN -->
+        <section id="screen-add" class="screen">
+            <h2>Add New Question</h2>
+            <form id="add-form" onsubmit="app.addQuestion(event)">
+                <div class="form-group">
+                    <label>Question:</label>
+                    <input type="text" id="in-question" required placeholder="Enter question...">
+                </div>
+                <div class="form-group">
+                    <label>Option A:</label>
+                    <input type="text" id="in-a" required placeholder="First option...">
+                </div>
+                <div class="form-group">
+                    <label>Option B:</label>
+                    <input type="text" id="in-b" required placeholder="Second option...">
+                </div>
+                <div class="form-group">
+                    <label>Option C:</label>
+                    <input type="text" id="in-c" required placeholder="Third option...">
+                </div>
+                <div class="form-group">
+                    <label>Option D:</label>
+                    <input type="text" id="in-d" required placeholder="Fourth option...">
+                </div>
+                <div class="form-group">
+                    <label>Correct Answer:</label>
+                    <select id="in-correct" required>
+                        <option value="0">A</option>
+                        <option value="1">B</option>
+                        <option value="2">C</option>
+                        <option value="3">D</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Explanation:</label>
+                    <textarea id="in-explain" required placeholder="Why is this correct?"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Add Question</button>
+                <button type="button" class="btn btn-ai" onclick="app.generateExplanation()">
+                    AI Generate Explanation
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="app.showMenu()">
+                    Cancel
+                </button>
+            </form>
+        </section>
+
+        <!-- VIEW ALL SCREEN -->
+        <section id="screen-view" class="screen">
+            <h2>All Questions</h2>
+            <div id="view-list"></div>
+            <button class="btn btn-secondary" onclick="app.showMenu()">
+                Back to Menu
+            </button>
+        </section>
+
+        <!-- AI GENERATE SCREEN -->
+        <section id="screen-generate" class="screen">
+            <h2>Generate AI Questions</h2>
+            <div class="form-group">
+                <label>Topic:</label>
+                <input type="text" id="gen-topic" placeholder="e.g., Python loops, HTML tags">
+            </div>
+            <div class="form-group">
+                <label>Number:</label>
+                <input type="number" id="gen-count" value="3" min="1" max="5">
+            </div>
+            <div class="form-group">
+                <label>Difficulty:</label>
+                <select id="gen-diff">
+                    <option value="easy">Easy</option>
+                    <option value="medium">Medium</option>
+                    <option value="hard">Hard</option>
+                </select>
+            </div>
+            <div id="gen-loading" class="loading" style="display:none;">
+                <p>Generating questions...</p>
+                <div class="spinner"></div>
+            </div>
+            <button class="btn btn-ai" onclick="app.generateQuestions()">
+                Generate
+            </button>
+            <button class="btn btn-secondary" onclick="app.showMenu()">
+                Cancel
+            </button>
+        </section>
+
+        <!-- STUDY PLAN SCREEN -->
+        <section id="screen-study" class="screen">
+            <h2>AI Study Plan</h2>
+            <div id="study-content" style="background:#0f3460; padding:20px; border-radius:10px; line-height:1.8;">
+                <p style="color:#a0a0a0;">Loading...</p>
+            </div>
+            <button class="btn btn-secondary" onclick="app.showMenu()" style="margin-top:20px;">
+                Back to Menu
+            </button>
+        </section>
+
+    </div>
+
+    <script>
+        // ============================================
+        // QUIZ APP - All JavaScript in one place
+        // ============================================
+        
+        const app = (function() {
+            
+            // Private state
+            let questions = [];
+            let currentIndex = 0;
+            let score = 0;
+            let wrongAnswers = [];
+            let aiMode = 'none';
+            let ollamaConfig = { url: '', model: '' };
+
+            // Mock AI data
+            const mockHints = [
+                "Think about what this term is commonly used for in programming.",
+                "Consider the first letter of each word in the acronym.",
+                "This is a fundamental concept that every programmer learns early.",
+                "Think about how computers process instructions repeatedly.",
+                "Remember that programming languages have strict rules for writing code."
+            ];
+
+            const mockExplanations = {
+                "html": "HTML (HyperText Markup Language) is the standard markup language for documents designed to be displayed in a web browser.",
+                "variable": "A variable is like a labeled container in memory. You can put data in it, read it, and change it later.",
+                "ide": "IDE stands for Integrated Development Environment. It's software that combines a code editor, debugger, and build tools.",
+                "loop": "A loop is a control structure that repeats a block of code multiple times.",
+                "syntax": "Syntax is the set of rules that defines how code must be written in a specific programming language.",
+                "cpu": "CPU (Central Processing Unit) is the primary component of a computer that performs most of the processing.",
+                "function": "A function is a reusable block of code designed to perform a specific task.",
+                "debugging": "Debugging is the process of finding and resolving bugs (errors) within computer programs."
+            };
+
+            const mockStudyPlans = [
+                "Focus on understanding basic programming concepts. Review variables, data types, and control structures. Practice writing simple programs daily.",
+                "Study common programming acronyms and terms. Create flashcards for HTML, CSS, JS, CPU, RAM, and IDE. Test yourself regularly.",
+                "Practice with hands-on coding exercises. Websites like Codecademy and freeCodeCamp offer interactive tutorials for beginners."
+            ];
+
+            // Factory: Create question object
+            function createQuestion(question, options, correct, explanation) {
+                return {
+                    question: question,
+                    options: options,
+                    correct: correct,
+                    explanation: explanation
+                };
+            }
+
+            // Default questions
+            function getDefaults() {
+                return [
+                    createQuestion("What does 'HTML' stand for?",
+                        ["Hyper Text Markup Language", "High Tech Modern Language", 
+                         "Home Tool Markup Language", "Hyperlink Text Mode Language"],
+                        0, "HTML is the standard language for creating web pages."),
+                    
+                    createQuestion("What is a 'variable' in programming?",
+                        ["A fixed number", "A container that stores data values", 
+                         "A type of virus", "A programming language"],
+                        1, "Variables are like labeled boxes - you can store data in them."),
+                    
+                    createQuestion("What does 'IDE' stand for?",
+                        ["Internet Data Exchange", "Integrated Development Environment", 
+                         "Internal Drive Engine", "Interactive Design Editor"],
+                        1, "An IDE is software that helps programmers write code."),
+                    
+                    createQuestion("What is a 'loop' in programming?",
+                        ["A circular cable", "Code that repeats instructions", 
+                         "A type of error", "A database table"],
+                        1, "Loops let you run the same code block repeatedly."),
+                    
+                    createQuestion("What is 'syntax' in programming?",
+                        ["Speed of execution", "Rules for writing code correctly", 
+                         "A software license", "Visual design of a website"],
+                        1, "Syntax is like grammar for programming."),
+                    
+                    createQuestion("What does 'CPU' stand for?",
+                        ["Central Processing Unit", "Computer Personal Unit", 
+                         "Central Program Utility", "Core Processing Unit"],
+                        0, "The CPU is the 'brain' of the computer."),
+                    
+                    createQuestion("What is a 'function' in programming?",
+                        ["A math equation", "A reusable block of code", 
+                         "A hardware component", "A file format"],
+                        1, "Functions wrap reusable logic into named blocks."),
+                    
+                    createQuestion("What is 'debugging'?",
+                        ["Removing viruses", "Finding and fixing errors", 
+                         "Upgrading hardware", "Designing interfaces"],
+                        1, "Debugging is finding bugs (errors) in your code.")
+                ];
+            }
+
+            // Storage
+            function save() {
+                localStorage.setItem('quiz_questions', JSON.stringify(questions));
+                localStorage.setItem('quiz_ai_mode', aiMode);
+            }
+
+            function load() {
+                const saved = localStorage.getItem('quiz_questions');
+                const savedMode = localStorage.getItem('quiz_ai_mode');
+                if (saved) {
+                    questions = JSON.parse(saved);
+                }
+                if (savedMode) {
+                    aiMode = savedMode;
+                }
+                return questions.length > 0;
+            }
+
+            // Screen management
+            function showScreen(id) {
+                document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+                document.getElementById(id).classList.add('active');
+            }
+
+            // Update stats
+            function updateStats() {
+                document.getElementById('total-q').textContent = questions.length;
+            }
+
+            // Show question
+            function showQuestion() {
+                const q = questions[currentIndex];
+                const total = questions.length;
+                
+                // Progress bar
+                const progress = ((currentIndex + 1) / total) * 100;
+                document.getElementById('progress').style.width = progress + '%';
+                
+                // Header
+                document.getElementById('q-number').textContent = 
+                    `Question ${currentIndex + 1} of ${total}`;
+                document.getElementById('q-score').textContent = `Score: ${score}`;
+                
+                // Question text
+                document.getElementById('q-text').textContent = q.question;
+                
+                // Options
+                const optsDiv = document.getElementById('options');
+                optsDiv.innerHTML = '';
+                const letters = ['A', 'B', 'C', 'D'];
+                
+                q.options.forEach((opt, i) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'option';
+                    btn.textContent = `${letters[i]}. ${opt}`;
+                    btn.onclick = () => handleAnswer(i);
+                    optsDiv.appendChild(btn);
+                });
+                
+                // Reset feedback
+                document.getElementById('feedback').classList.remove('show');
+                document.getElementById('next-btn').style.display = 'none';
+                document.getElementById('hint-box').classList.remove('show');
+                
+                // Show hint button if AI enabled
+                const hintBtn = document.getElementById('hint-btn');
+                hintBtn.style.display = (aiMode !== 'none') ? 'inline-block' : 'none';
+            }
+
+            // Handle answer
+            function handleAnswer(selected) {
+                const q = questions[currentIndex];
+                const correct = q.correct;
+                const opts = document.querySelectorAll('.option');
+                
+                // Disable all options
+                opts.forEach(o => o.classList.add('disabled'));
+                
+                // Highlight correct
+                opts[correct].classList.add('correct');
+                
+                const feedbackDiv = document.getElementById('feedback');
+                const feedbackResult = document.getElementById('feedback-result');
+                const explanation = document.getElementById('explanation');
+                
+                if (selected === correct) {
+                    score++;
+                    feedbackResult.className = 'correct-text';
+                    feedbackResult.textContent = 'Correct! Well done!';
+                } else {
+                    opts[selected].classList.add('wrong');
+                    feedbackResult.className = 'wrong-text';
+                    feedbackResult.textContent = 'Wrong answer!';
+                    wrongAnswers.push({
+                        question: q,
+                        userAnswer: selected,
+                        correctAnswer: correct
+                    });
+                }
+                
+                explanation.textContent = q.explanation;
+                feedbackDiv.classList.add('show');
+                document.getElementById('next-btn').style.display = 'block';
+                
+                document.getElementById('q-score').textContent = `Score: ${score}`;
+            }
+
+            // Next question
+            function nextQuestion() {
+                currentIndex++;
+                if (currentIndex < questions.length) {
+                    showQuestion();
+                } else {
+                    showResults();
+                }
+            }
+
+            // Show results
+            function showResults() {
+                const pct = Math.round((score / questions.length) * 100);
+                
+                document.getElementById('final-percent').textContent = pct;
+                document.getElementById('correct-num').textContent = score;
+                document.getElementById('total-num').textContent = questions.length;
+                
+                let msg = '';
+                if (pct >= 90) msg = 'Excellent! You are a programming wizard!';
+                else if (pct >= 70) msg = 'Good job! Keep practicing!';
+                else if (pct >= 50) msg = 'Not bad! Review and try again.';
+                else msg = 'Keep studying! You will get better!';
+                
+                document.getElementById('result-msg').textContent = msg;
+                showScreen('screen-result');
+            }
+
+            // Show review
+            function showReview() {
+                const list = document.getElementById('review-list');
+                list.innerHTML = '';
+                
+                if (wrongAnswers.length === 0) {
+                    list.innerHTML = '<p style="text-align:center; color:#2ecc71; font-size:1.2rem;">Perfect! All correct!</p>';
+                } else {
+                    const letters = ['A', 'B', 'C', 'D'];
+                    wrongAnswers.forEach((item, i) => {
+                        const div = document.createElement('div');
+                        div.className = 'review-item';
+                        div.innerHTML = `
+                            <h4>${i + 1}. ${item.question.question}</h4>
+                            <p class="wrong-ans">Your answer: ${letters[item.userAnswer]}. ${item.question.options[item.userAnswer]}</p>
+                            <p class="correct-ans">Correct: ${letters[item.correctAnswer]}. ${item.question.options[item.correctAnswer]}</p>
+                            <p class="explain">${item.question.explanation}</p>
+                        `;
+                        list.appendChild(div);
+                    });
+                }
+                
+                showScreen('screen-review');
+            }
+
+            // Add question
+            function addQuestion(e) {
+                e.preventDefault();
+                
+                const q = createQuestion(
+                    document.getElementById('in-question').value.trim(),
+                    [
+                        document.getElementById('in-a').value.trim(),
+                        document.getElementById('in-b').value.trim(),
+                        document.getElementById('in-c').value.trim(),
+                        document.getElementById('in-d').value.trim()
+                    ],
+                    parseInt(document.getElementById('in-correct').value),
+                    document.getElementById('in-explain').value.trim()
+                );
+                
+                questions.push(q);
+                save();
+                alert('Question added!');
+                showMenu();
+            }
+
+            // View all questions
+            function showAll() {
+                const list = document.getElementById('view-list');
+                list.innerHTML = '';
+                const letters = ['A', 'B', 'C', 'D'];
+                
+                questions.forEach((q, i) => {
+                    const div = document.createElement('div');
+                    div.className = 'q-item';
+                    let opts = '';
+                    q.options.forEach((opt, j) => {
+                        const cls = j === q.correct ? 'correct-opt' : '';
+                        opts += `<p class="${cls}">${letters[j]}. ${opt}${j === q.correct ? ' ✓' : ''}</p>`;
+                    });
+                    div.innerHTML = `
+                        <h4>${i + 1}. ${q.question}</h4>
+                        ${opts}
+                        <p style="color:#a0a0a0; font-style:italic; margin-top:10px;">${q.explanation}</p>
+                    `;
+                    list.appendChild(div);
+                });
+                
+                showScreen('screen-view');
+            }
+
+            // AI: Connect to Ollama
+            async function connectOllama() {
+                const url = document.getElementById('ollama-url').value.trim();
+                const model = document.getElementById('ollama-model').value.trim();
+                const status = document.getElementById('ai-status');
+                
+                status.style.display = 'block';
+                status.textContent = 'Connecting...';
+                status.className = 'ai-status';
+                
+                try {
+                    const res = await fetch(`${url}/api/tags`);
+                    if (res.ok) {
+                        ollamaConfig = { url, model };
+                        aiMode = 'ollama';
+                        save();
+                        status.textContent = `Connected! Using ${model}`;
+                        status.className = 'ai-status connected';
+                        setTimeout(() => showMenu(), 1000);
+                    } else {
+                        throw new Error('Bad response');
+                    }
+                } catch (e) {
+                    status.textContent = 'Failed to connect. Try Mock AI mode.';
+                    status.className = 'ai-status error';
+                }
+            }
+
+            // AI: Use Mock AI
+            function useMockAI() {
+                aiMode = 'mock';
+                save();
+                showMenu();
+            }
+
+            // AI: Skip AI
+            function skipAI() {
+                aiMode = 'none';
+                save();
+                showMenu();
+            }
+
+            // AI: Get hint
+            async function getHint() {
+                if (aiMode === 'none') return;
+                
+                const hintBox = document.getElementById('hint-box');
+                const hintText = document.getElementById('hint-text');
+                
+                hintBox.classList.add('show');
+                hintText.textContent = 'Getting hint...';
+                
+                if (aiMode === 'mock') {
+                    const random = mockHints[Math.floor(Math.random() * mockHints.length)];
+                    hintText.textContent = `AI Hint: ${random}`;
+                } else if (aiMode === 'ollama') {
+                    try {
+                        const q = questions[currentIndex];
+                        const res = await fetch(`${ollamaConfig.url}/api/generate`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                model: ollamaConfig.model,
+                                prompt: `Give a brief hint for: ${q.question}`,
+                                stream: false
+                            })
+                        });
+                        const data = await res.json();
+                        hintText.textContent = `AI Hint: ${data.response}`;
+                    } catch (e) {
+                        hintText.textContent = 'Could not get hint.';
+                    }
+                }
+            }
+
+            // AI: Generate explanation
+            async function generateExplanation() {
+                const question = document.getElementById('in-question').value;
+                const correctIdx = document.getElementById('in-correct').value;
+                const options = [
+                    document.getElementById('in-a').value,
+                    document.getElementById('in-b').value,
+                    document.getElementById('in-c').value,
+                    document.getElementById('in-d').value
+                ];
+                
+                if (!question || options.some(o => !o)) {
+                    alert('Fill in question and all options first!');
+                    return;
+                }
+                
+                if (aiMode === 'mock') {
+                    const lowerQ = question.toLowerCase();
+                    let explanation = 'This is an important programming concept.';
+                    
+                    for (let key in mockExplanations) {
+                        if (lowerQ.includes(key)) {
+                            explanation = mockExplanations[key];
+                            break;
+                        }
+                    }
+                    
+                    document.getElementById('in-explain').value = explanation;
+                } else if (aiMode === 'ollama') {
+                    try {
+                        const res = await fetch(`${ollamaConfig.url}/api/generate`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                model: ollamaConfig.model,
+                                prompt: `Explain why "${options[correctIdx]}" is correct for: "${question}"`,
+                                stream: false
+                            })
+                        });
+                        const data = await res.json();
+                        document.getElementById('in-explain').value = data.response;
+                    } catch (e) {
+                        alert('Failed. Using mock explanation.');
+                        document.getElementById('in-explain').value = mockExplanations['variable'];
+                    }
+                } else {
+                    alert('Enable AI first!');
+                }
+            }
+
+            // AI: Generate questions
+            async function generateQuestions() {
+                const topic = document.getElementById('gen-topic').value.trim();
+                const count = parseInt(document.getElementById('gen-count').value);
+                const diff = document.getElementById('gen-diff').value;
+                
+                if (!topic) {
+                    alert('Enter a topic!');
+                    return;
+                }
+                
+                const loading = document.getElementById('gen-loading');
+                loading.style.display = 'block';
+                
+                if (aiMode === 'mock') {
+                    setTimeout(() => {
+                        const mockQs = [
+                            createQuestion(`What is the main purpose of ${topic}?`,
+                                [`To make code slower`, `To improve code organization`, `To delete files`, `To draw graphics`],
+                                1, `${topic} helps organize and structure your code better.`),
+                            createQuestion(`Which is a key feature of ${topic}?`,
+                                [`Random numbers`, `Code reusability`, `File deletion`, `Network hacking`],
+                                1, `A key feature of ${topic} is making code reusable.`),
+                            createQuestion(`When should you use ${topic}?`,
+                                [`Never`, `When writing complex programs`, `Only on Sundays`, `To break the computer`],
+                                1, `Use ${topic} when building structured, maintainable programs.`)
+                        ];
+                        questions = questions.concat(mockQs.slice(0, count));
+                        save();
+                        updateStats();
+                        alert(`Generated ${Math.min(count, mockQs.length)} questions!`);
+                        loading.style.display = 'none';
+                        showMenu();
+                    }, 1500);
+                } else if (aiMode === 'ollama') {
+                    try {
+                        const res = await fetch(`${ollamaConfig.url}/api/generate`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                model: ollamaConfig.model,
+                                prompt: `Create ${count} multiple choice questions about ${topic} at ${diff} difficulty. Format: QUESTION: [text] A) [opt] B) [opt] C) [opt] D) [opt] CORRECT: [A/B/C/D] EXPLANATION: [text]`,
+                                stream: false
+                            })
+                        });
+                        const data = await res.json();
+                        // Parse would go here - simplified for demo
+                        alert('Questions generated! (Parsing simplified)');
+                        loading.style.display = 'none';
+                        showMenu();
+                    } catch (e) {
+                        alert('Failed. Switch to Mock AI.');
+                        loading.style.display = 'none';
+                    }
+                } else {
+                    alert('Enable AI first!');
+                    loading.style.display = 'none';
+                }
+            }
+
+            // AI: Get study plan
+            async function getStudyPlan() {
+                if (wrongAnswers.length === 0) {
+                    alert('You got everything right! No study plan needed.');
+                    return;
+                }
+                
+                showScreen('screen-study');
+                const content = document.getElementById('study-content');
+                
+                if (aiMode === 'mock') {
+                    const random = mockStudyPlans[Math.floor(Math.random() * mockStudyPlans.length)];
+                    content.innerHTML = `<div style="white-space:pre-line;">AI Study Plan:\n\n${random}\n\nFocus areas:\n${wrongAnswers.map((w, i) => `${i + 1}. Review: ${w.question.question}`).join('\n')}</div>`;
+                } else if (aiMode === 'ollama') {
+                    content.innerHTML = '<p>Generating...</p><div class="spinner"></div>';
+                    try {
+                        const topics = wrongAnswers.map(w => w.question.question).join('\n');
+                        const res = await fetch(`${ollamaConfig.url}/api/generate`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                model: ollamaConfig.model,
+                                prompt: `Student got these wrong:\n${topics}\n\nCreate a brief study plan.`,
+                                stream: false
+                            })
+                        });
+                        const data = await res.json();
+                        content.innerHTML = `<div style="white-space:pre-line;">AI Study Plan:\n\n${data.response}</div>`;
+                    } catch (e) {
+                        content.innerHTML = '<p>Failed to generate.</p>';
+                    }
+                } else {
+                    content.innerHTML = '<p>Enable AI in settings to get a study plan.</p>';
+                }
+            }
+
+            // Reset to defaults
+            function resetDefaults() {
+                if (confirm('Delete all custom questions?')) {
+                    questions = getDefaults();
+                    save();
+                    updateStats();
+                    alert('Reset complete!');
+                }
+            }
+
+            // Public API
+            return {
+                init: function() {
+                    if (!load()) {
+                        questions = getDefaults();
+                        save();
+                    }
+                    updateStats();
+                    // If already has AI mode saved, go to menu
+                    if (aiMode !== 'none') {
+                        showMenu();
+                    } else {
+                        showScreen('screen-ai');
+                    }
+                },
+                
+                connectOllama: connectOllama,
+                useMockAI: useMockAI,
+                skipAI: skipAI,
+                
+                showMenu: function() {
+                    updateStats();
+                    document.getElementById('mock-badge').style.display = (aiMode === 'mock') ? 'inline-block' : 'none';
+                    showScreen('screen-menu');
+                },
+                
+                startQuiz: function() {
+                    if (questions.length === 0) {
+                        alert('No questions! Add some first.');
+                        return;
+                    }
+                    currentIndex = 0;
+                    score = 0;
+                    wrongAnswers = [];
+                    showScreen('screen-quiz');
+                    showQuestion();
+                },
+                
+                handleAnswer: handleAnswer,
+                nextQuestion: nextQuestion,
+                showReview: showReview,
+                
+                showAddQuestion: function() {
+                    showScreen('screen-add');
+                },
+                
+                addQuestion: addQuestion,
+                
+                showAllQuestions: function() {
+                    showAll();
+                },
+                
+                showAIGenerate: function() {
+                    showScreen('screen-generate');
+                },
+                
+                generateQuestions: generateQuestions,
+                getHint: getHint,
+                generateExplanation: generateExplanation,
+                getStudyPlan: getStudyPlan,
+                resetDefaults: resetDefaults
+            };
+            
+        })();
+
+        // Start app
+        document.addEventListener('DOMContentLoaded', function() {
+            app.init();
+        });
+    </script>
+
+</body>
+</html>
